@@ -1,23 +1,31 @@
+const utils = require('../utils');
+
 module.exports = {
     labels: ['User'],
-    'id': {
+    id: {
         type: 'uuid',
         index: true,
         primary:true,
         required: true,
     },
-    'uuid': {
+    uuid: {
         type: 'uuid',
         index: true,
         primary:true,
         required: true,
     },
-    'name':{
+    name:{
         type:'string',
         required: true,
     },
-    'created_at': 'datetime',
-    'updated_at': 'datetime',
+    created_at: {
+        type: 'datetime',
+        default: utils.datetime_now()
+    },
+    updated_at: {
+        type: 'datetime',
+        default: utils.datetime_now()
+    },
 
     interested_in: {
         type: "relationship",
@@ -25,7 +33,10 @@ module.exports = {
         relationship: "INTERESTED_IN",
         direction: "out",
         properties: {
-            created_at: 'datetime',
+            created_at: {
+                type: 'datetime',
+                default: utils.datetime_now()
+            },
         }
     },
     liked: {
@@ -34,7 +45,10 @@ module.exports = {
         relationship: "LIKED",
         direction: "out",
         properties: {
-            created_at: 'datetime',
+            created_at: {
+                type: 'datetime',
+                default: utils.datetime_now()
+            },
         }
     },
     viewed_promotion: {
@@ -43,7 +57,10 @@ module.exports = {
         relationship: "VIEWED",
         direction: "out",
         properties: {
-            created_at: 'datetime',
+            created_at: {
+                type: 'datetime',
+                default: utils.datetime_now()
+            },
         }
     },
     viewed_store: {
@@ -52,7 +69,10 @@ module.exports = {
         relationship: "VIEWED",
         direction: "out",
         properties: {
-            created_at: 'datetime',
+            created_at: {
+                type: 'datetime',
+                default: utils.datetime_now()
+            },
         }
     },
     viewed_mall: {
@@ -61,7 +81,10 @@ module.exports = {
         relationship: "VIEWED",
         direction: "out",
         properties: {
-            created_at: 'datetime',
+            created_at: {
+                type: 'datetime',
+                default: utils.datetime_now()
+            },
         }
     },
     bookmarked_store: {
@@ -70,7 +93,10 @@ module.exports = {
         relationship: "BOOKMARKED",
         direction: "out",
         properties: {
-            created_at: 'datetime',
+            created_at: {
+                type: 'datetime',
+                default: utils.datetime_now()
+            },
         }
     },
     bookmarked_mall: {
@@ -79,7 +105,10 @@ module.exports = {
         relationship: "BOOKMARKED",
         direction: "out",
         properties: {
-            created_at: 'datetime',
+            created_at: {
+                type: 'datetime',
+                default: utils.datetime_now()
+            },
         }
     }
 };

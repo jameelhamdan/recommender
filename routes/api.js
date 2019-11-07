@@ -5,7 +5,7 @@
  * @param {Neode} neode  Neode instance
  * @return {Router}      Express router
  */
-module.exports = function(neode) {
+module.exports = function (neode) {
     const router = require('express').Router();
 
     router.get('/', async (req, res) => {

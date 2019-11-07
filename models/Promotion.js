@@ -1,23 +1,31 @@
+const utils = require('../utils');
+
 module.exports = {
     labels: ['Promotion'],
-    'id': {
+    id: {
         type: 'uuid',
         index: true,
         primary:true,
         required: true,
     },
-    'uuid': {
+    uuid: {
         type: 'uuid',
         index: true,
         primary:true,
         required: true,
     },
-    'name':{
+    name:{
         type:'string',
         required: true,
     },
-    'created_at': 'datetime',
-    'updated_at': 'datetime',
+    created_at: {
+        type: 'datetime',
+        default: utils.datetime_now()
+    },
+    updated_at: {
+        type: 'datetime',
+        default: utils.datetime_now()
+    },
 
     in_category: {
         type: "relationship",
@@ -25,7 +33,10 @@ module.exports = {
         relationship: "IN_CATEGORY",
         direction: "out",
         properties: {
-            created_at: 'datetime',
+            created_at: {
+                type: 'datetime',
+                default: utils.datetime_now()
+            },
         }
     },
     promoted_by_store: {
@@ -34,7 +45,10 @@ module.exports = {
         relationship: "PROMOTED_BY",
         direction: "out",
         properties: {
-            created_at: 'datetime',
+            created_at: {
+                type: 'datetime',
+                default: utils.datetime_now()
+            },
         }
     },
     promoted_by_mall: {
@@ -43,7 +57,10 @@ module.exports = {
         relationship: "PROMOTED_BY",
         direction: "out",
         properties: {
-            created_at: 'datetime',
+            created_at: {
+                type: 'datetime',
+                default: utils.datetime_now()
+            },
         }
     }
 };

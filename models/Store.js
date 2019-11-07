@@ -1,24 +1,33 @@
+const utils = require('../utils');
+
 module.exports = {
     labels: ['Store'],
-    'id': {
+    id: {
         type: 'uuid',
         index: true,
         primary:true,
         required: true,
     },
-    'uuid': {
+    uuid: {
         type: 'uuid',
         index: true,
         primary:true,
         required: true,
     },
-    'name':{
+    name:{
         type:'string',
         required: true,
     },
-    'location': 'point',
-    'created_at': 'datetime',
-    'updated_at': 'datetime',
+    created_at: {
+        type: 'datetime',
+        default: utils.datetime_now()
+    },
+    updated_at: {
+        type: 'datetime',
+        default: utils.datetime_now()
+    },
+
+    location: 'point',
 
     in_category: {
         type: "relationship",
@@ -26,7 +35,10 @@ module.exports = {
         relationship: "IN_CATEGORY",
         direction: "out",
         properties: {
-            created_at: 'datetime',
+            created_at: {
+                type: 'datetime',
+                default: utils.datetime_now()
+            },
         }
     },
     is_in: {
@@ -35,7 +47,10 @@ module.exports = {
         relationship: "IS_IN",
         direction: "out",
         properties: {
-            created_at: 'datetime',
+            created_at: {
+                type: 'datetime',
+                default: utils.datetime_now()
+            },
         }
     }
 };
