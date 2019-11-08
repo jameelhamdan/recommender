@@ -4,9 +4,7 @@ module.exports = {
     labels: ['Promotion'],
     uuid: {
         type: 'uuid',
-        index: true,
         primary:true,
-        required: true
     },
     name:{
         type:'string',

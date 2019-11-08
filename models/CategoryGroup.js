@@ -4,9 +4,7 @@ module.exports = {
     labels: ['CategoryGroup'],
     uuid: {
         type: 'uuid',
-        index: true,
         primary:true,
-        required: true,
     },
     name:{
         type:'string',
