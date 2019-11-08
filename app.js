@@ -1,24 +1,26 @@
-const express = require('express');
-const session = require('express-session');
+const express = require('express'),
+    app = express(),
+    bodyParser = require('body-parser');
+
 const path = require('path');
 
 const neode = require('neode')
     .fromEnv()
     .withDirectory(path.join(__dirname, 'models'));
 
-const app = express();
+const app_port = process.env.PORT || 3000;
 
-app.use(session({
-    genid: function() {
-        return require('uuid').v4();
-    },
-    resave: false,
-    saveUninitialized: true,
-    secret: process.env.SECRET_KEY || 'very_secret_key'
-}));
+// Middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
 
+// Routes
 app.use(require('./routes/api')(neode));
 
-app.listen(3000, function () {
-    console.log('app listening on http://localhost:3000');
+app.listen(app_port, async () => {
+    console.log(`app listening on http://localhost:${app_port}`);
+
+    neode.schema.install()
+        .then(() => console.log('Neo4j Schema installed!'))
+        .catch((e) => console.log('Neo4j Schema installation Failed! => \n ' + e.stack))
 });

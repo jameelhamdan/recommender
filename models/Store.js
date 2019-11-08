@@ -2,17 +2,11 @@ const utils = require('../utils');
 
 module.exports = {
     labels: ['Store'],
-    id: {
-        type: 'uuid',
-        index: true,
-        primary:true,
-        required: true,
-    },
     uuid: {
         type: 'uuid',
         index: true,
         primary:true,
-        required: true,
+        required: true
     },
     name:{
         type:'string',

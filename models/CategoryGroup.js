@@ -2,12 +2,6 @@ const utils = require('../utils');
 
 module.exports = {
     labels: ['CategoryGroup'],
-    id: {
-        type: 'uuid',
-        index: true,
-        primary:true,
-        required: true,
-    },
     uuid: {
         type: 'uuid',
         index: true,
