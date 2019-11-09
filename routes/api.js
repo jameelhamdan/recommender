@@ -25,5 +25,10 @@ module.exports = function (neode) {
         await functions.create(neode, req, res, 'User', user_fields);
     });
 
+    router.post('/users/update/', async (req, res) => {
+        const user_fields = ['name'];
+        await functions.update(neode, req, res, 'User', user_fields);
+    });
+
     return router;
 };

@@ -18,7 +18,7 @@ module.exports = {
                 res.send(json);
             })
             .catch(e => {
-                res.status(500).send(e.stack);
+                utils.handle_neo4j_exception(res, e);
             });
     },
     find: async function (neode, req, res, model, params = {}) {
@@ -31,31 +31,16 @@ module.exports = {
                 res.send(json);
             })
             .catch(e => {
-                res.status(500).send(e.stack);
+                utils.handle_neo4j_exception(res, e);
             });
     },
     create: async function (neode, req, res, model, parse_fields = []) {
-        const properties = {};
+        const validated_input = utils.validate_input(req.body, parse_fields);
+        const properties = validated_input['properties'];
+        const errors = validated_input['errors'];
 
-
-        if (parse_fields.length === 0) {
-            res.status(400).send({'error': 'No values to parse provided'});
-        }
-
-        // Add More Field Specific Validation
-        const errors = [];
-        for (const index in parse_fields) {
-            const field = parse_fields[index];
-            const value = req.body[field];
-            if (typeof value === 'undefined' || value.length === 0) {
-                errors.push({field: `Invalid Value : '${value}'`});
-            }
-
-            properties[field] = req.body[field];
-        }
-
-        if (errors.length > 0){
-            res.status(400).send({'errors': errors });
+        if (errors.length > 0) {
+            res.status(400).send({'errors': errors});
             return
         }
 
@@ -66,8 +51,31 @@ module.exports = {
             .then(json => {
                 res.send(json);
             })
+            .catch((e) => {
+                utils.handle_neo4j_exception(res, e);
+            });
+    },
+    update: async function (neode, req, res, model, parse_fields = []) {
+        const id_value = req.body.uuid;
+        const validated_input = await utils.validate_input(req.body, parse_fields);
+        const properties = validated_input['properties'];
+        const errors = validated_input['errors'];
+
+        if (errors.length > 0) {
+            res.status(400).send({'errors': errors});
+            return
+        }
+
+        neode.find(model, id_value)
+            .then(async (obj) => {
+                await obj.update(properties);
+                return obj.toJson();
+            })
+            .then(json => {
+                res.send(json);
+            })
             .catch(e => {
-                res.status(500).send(e.stack);
+                utils.handle_neo4j_exception(res, e);
             });
     }
 };
