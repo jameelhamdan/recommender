@@ -25,6 +25,9 @@ module.exports = {
         relationship: "IN_GROUP",
         direction: "out",
         properties: {
+            uuid: {
+                type: 'uuid',
+            },
             created_at: {
                 type: 'datetime',
                 default: utils.datetime_now()

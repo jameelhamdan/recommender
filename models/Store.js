@@ -27,6 +27,9 @@ module.exports = {
         relationship: "IN_CATEGORY",
         direction: "out",
         properties: {
+            uuid: {
+                type: 'uuid',
+            },
             created_at: {
                 type: 'datetime',
                 default: utils.datetime_now()
@@ -39,6 +42,9 @@ module.exports = {
         relationship: "IS_IN",
         direction: "out",
         properties: {
+            uuid: {
+                type: 'uuid',
+            },
             created_at: {
                 type: 'datetime',
                 default: utils.datetime_now()

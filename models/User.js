@@ -25,6 +25,9 @@ module.exports = {
         relationship: "INTERESTED_IN",
         direction: "out",
         properties: {
+            uuid: {
+                type: 'uuid',
+            },
             created_at: {
                 type: 'datetime',
                 default: utils.datetime_now()
@@ -37,6 +40,9 @@ module.exports = {
         relationship: "LIKED",
         direction: "out",
         properties: {
+            uuid: {
+                type: 'uuid',
+            },
             created_at: {
                 type: 'datetime',
                 default: utils.datetime_now()
@@ -49,6 +55,9 @@ module.exports = {
         relationship: "VIEWED",
         direction: "out",
         properties: {
+            uuid: {
+                type: 'uuid',
+            },
             created_at: {
                 type: 'datetime',
                 default: utils.datetime_now()
@@ -61,6 +70,9 @@ module.exports = {
         relationship: "VIEWED",
         direction: "out",
         properties: {
+            uuid: {
+                type: 'uuid',
+            },
             created_at: {
                 type: 'datetime',
                 default: utils.datetime_now()
@@ -73,6 +85,9 @@ module.exports = {
         relationship: "VIEWED",
         direction: "out",
         properties: {
+            uuid: {
+                type: 'uuid',
+            },
             created_at: {
                 type: 'datetime',
                 default: utils.datetime_now()
@@ -85,6 +100,9 @@ module.exports = {
         relationship: "BOOKMARKED",
         direction: "out",
         properties: {
+            uuid: {
+                type: 'uuid',
+            },
             created_at: {
                 type: 'datetime',
                 default: utils.datetime_now()
@@ -97,6 +115,9 @@ module.exports = {
         relationship: "BOOKMARKED",
         direction: "out",
         properties: {
+            uuid: {
+                type: 'uuid',
+            },
             created_at: {
                 type: 'datetime',
                 default: utils.datetime_now()
