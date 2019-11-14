@@ -73,8 +73,8 @@ module.exports = {
             'errors': errors,
         }
     },
-    datetime_now: function () {
-        return Date.now()
+    datetime_now: () => {
+        return () => new Date();
     },
     hydrateRelationship: function(result, definition){
         let list = result.records;
