@@ -113,6 +113,63 @@ module.exports = {
                 res.send({'message': `'${model}' with uuid : '${object.get('uuid')}' was removed`});
             });
     },
+    recommended_promotions: async function (neode, req, res) {
+        const parse_fields = ['uuid'];
+
+        const validated_input = await utils.validate_input(req.body, parse_fields);
+        const properties = validated_input['properties'];
+        const errors = validated_input['errors'];
+
+        if (errors.length > 0) {
+            res.status(400).send({'errors': errors});
+            return
+        }
+
+
+        const id_value = req.body.uuid;
+        const limit = req.body.limit || 10;
+        const page = req.body.page || 1;
+        const skip = (page - 1) * limit;
+
+        this.get_object(neode, res, 'User', id_value)
+            .then(async (object) => {
+                const query = `                                       
+                    MATCH (u:User {uuid:"${object.get('uuid')}"}) WITH u AS user
+                    
+                    OPTIONAL MATCH (user)-[:INTERESTED_IN]->(interests:Category)
+                    OPTIONAL MATCH (user)-[:BOOKMARKED]->(bookmarked) 
+                    WITH user as user, collect(id(interests)) as interests_set, collect(id(bookmarked)) as bookmarked_set
+                    
+                    OPTIONAL MATCH (promotions:Promotion)
+                    OPTIONAL MATCH (promotions)-[:IN_CATEGORY]->(categories:Category)
+                    OPTIONAL MATCH (promotions)-[:PROMOTED_BY]->(promoters)
+                                        
+                    WITH 
+                        promotions,
+                        algo.similarity.jaccard(interests_set, collect(id(categories))) AS interest_similarity,
+                        algo.similarity.jaccard(bookmarked_set, collect(id(promoters))) AS bookmarked_similarity
+                       
+                    WITH 
+                        promotions,
+                        (interest_similarity + bookmarked_similarity)/2 as similarity
+                        
+                    RETURN promotions, similarity ORDER BY similarity DESC SKIP ${skip} LIMIT ${limit} ;
+                `;
+
+                neode.cypher(query, {})
+                    .then(async (result) => {
+                        var json = await neode.hydrate(result, 'promotions').toJson();
+                        for(var i=0;i< json.length;i++){
+                            json[i]['similarity'] = result.records[i].get('similarity');
+                        }
+
+                        res.send(json);
+                    })
+                    .catch(e => {
+                        utils.handle_neo4j_exception(res, e);
+                    });
+            })
+    },
     list_relationship_between: async function (neode, req, res, from_model, to_model, relationship_db_name, parse_fields = ['from_uuid', 'to_uuid']) {
         const validated_input = await utils.validate_input(req.body, parse_fields);
         let properties = validated_input['properties'];

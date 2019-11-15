@@ -18,8 +18,7 @@ module.exports = {
         type: 'datetime',
         default: utils.datetime_now()
     },
-
-    location: 'point',
+    location: 'point', // input format {"x": 1.45, "y": 31.45}
 
     in_category: {
         type: "relationship",
