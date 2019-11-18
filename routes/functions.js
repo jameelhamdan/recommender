@@ -73,6 +73,8 @@ module.exports = {
 
         const validated_input = await utils.validate_input(req.body, parse_fields);
         const properties = validated_input['properties'];
+        properties['updated_at'] = utils.datetime_now();
+        
         const errors = validated_input['errors'];
 
         if (errors.length > 0) {
@@ -87,10 +89,11 @@ module.exports = {
                 if (object === false) {
                     utils.throw_neo4j_not_found_error(model);
                 }
+
                 await object.update(properties);
                 const json = await object.toJson();
                 res.send(json);
-            })
+            });
     },
     remove: async function (neode, req, res, model) {
         const parse_fields = ['uuid'];
@@ -114,7 +117,7 @@ module.exports = {
             });
     },
     recommended_promotions: async function (neode, req, res) {
-        const parse_fields = ['uuid'];
+        const parse_fields = ['uuid', 'location',];
 
         const validated_input = await utils.validate_input(req.body, parse_fields);
         const properties = validated_input['properties'];
@@ -125,6 +128,26 @@ module.exports = {
             return
         }
 
+        // Custom Validation
+        let location = properties['location'];
+        if((typeof location['x']) === 'undefined' || (typeof location['y']) === 'undefined'){
+            errors.push({'location': 'Location format Invalid must be x,y'});
+        }
+
+        let categories = req.body['categories'];
+        if(!Array.isArray(categories) && (typeof categories) !== "undefined"){
+            errors.push({'array': 'Categories are invalid'});
+        } else {
+            categories = req.body['categories'] || [];
+        }
+
+        if (errors.length > 0) {
+            res.status(400).send({'errors': errors});
+            return
+        }
+
+        let longitude = location['x'];
+        let latitude = location['y'];
 
         const id_value = req.body.uuid;
         const limit = req.body.limit || 10;
@@ -133,34 +156,46 @@ module.exports = {
 
         this.get_object(neode, res, 'User', id_value)
             .then(async (object) => {
+                let categories_subquery = '';
+                if (categories.length > 0){
+                    categories_subquery = `WHERE category.uuid IN ${JSON.stringify(categories)}`
+                }
+
                 const query = `                                       
-                    MATCH (u:User {uuid:"${object.get('uuid')}"}) WITH u AS user
-                    
+                    MATCH (user:User {uuid:"${object.get('uuid')}"})    
+                                                                       
                     OPTIONAL MATCH (user)-[:INTERESTED_IN]->(interests:Category)
                     OPTIONAL MATCH (user)-[:BOOKMARKED]->(bookmarked) 
-                    WITH user as user, collect(id(interests)) as interests_set, collect(id(bookmarked)) as bookmarked_set
                     
-                    OPTIONAL MATCH (promotions:Promotion)
-                    OPTIONAL MATCH (promotions)-[:IN_CATEGORY]->(categories:Category)
-                    OPTIONAL MATCH (promotions)-[:PROMOTED_BY]->(promoters)
+                    WITH 
+                        user, 
+                        collect(id(interests)) as interests_set,
+                        collect(id(bookmarked)) as bookmarked_set
+                    
+                    MATCH (promotion:Promotion)-[:IN_CATEGORY]->(category:Category) ${categories_subquery}
+                    OPTIONAL MATCH (promotion)-[:PROMOTED_BY]->(promoter)
                                         
                     WITH 
-                        promotions,
-                        algo.similarity.jaccard(interests_set, collect(id(categories))) AS interest_similarity,
-                        algo.similarity.jaccard(bookmarked_set, collect(id(promoters))) AS bookmarked_similarity
+                        promotion,
+                        algo.similarity.jaccard(interests_set, collect(id(category))) AS interest_similarity,
+                        algo.similarity.jaccard(bookmarked_set, collect(id(promoter))) AS bookmarked_similarity,
+                        distance(point({ x: ${longitude}, y: ${latitude} }), promoter.location) AS distance            
                        
                     WITH 
-                        promotions,
+                        promotion,
+                        distance,
                         (interest_similarity + bookmarked_similarity)/2 as similarity
                         
-                    RETURN promotions, similarity ORDER BY similarity DESC SKIP ${skip} LIMIT ${limit} ;
+                        
+                    RETURN promotion, similarity, distance ORDER BY similarity DESC SKIP ${skip} LIMIT ${limit} ;
                 `;
 
                 neode.cypher(query, {})
                     .then(async (result) => {
-                        var json = await neode.hydrate(result, 'promotions').toJson();
+                        var json = await neode.hydrate(result, 'promotion').toJson();
                         for(var i=0;i< json.length;i++){
                             json[i]['similarity'] = result.records[i].get('similarity');
+                            json[i]['distance'] = result.records[i].get('distance');
                         }
 
                         res.send(json);
