@@ -1,3 +1,5 @@
+const DateTime = require('neo4j-driver/lib/v1/temporal-types.js');
+
 const neo4j_error_name = 'Neo4jError';
 const neo4j_error_messages = {
     "Neo.ClientError.Schema.ConstraintValidationFailed": "Constraint Validation Failed",
@@ -74,8 +76,9 @@ module.exports = {
         }
     },
     datetime_now: () => {
-        return () => new Date();
+        return () => DateTime.DateTime.fromStandardDate(new Date());
     },
+
     hydrateRelationship: function(result, definition){
         let list = result.records;
         let json_list = [];

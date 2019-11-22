@@ -158,7 +158,7 @@ module.exports = function (neode) {
     });
 
     router.post('/stores/update/', async (req, res) => {
-        const update_fields = ['name', 'location'];
+        const update_fields = ['name'];
         await functions.update(neode, req, res, 'Store', update_fields);
     });
 

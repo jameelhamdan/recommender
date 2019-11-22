@@ -30,3 +30,6 @@ app.listen(app_port, async () => {
     console.log(`app listening on http://localhost:${app_port}`);
 
 });
+
+// For Testing
+module.exports = app;

@@ -69,12 +69,10 @@ module.exports = {
             });
     },
     update: async function (neode, req, res, model, parse_fields = []) {
-        parse_fields = parse_fields.push['uuid'];
+        parse_fields.push('uuid');
 
         const validated_input = await utils.validate_input(req.body, parse_fields);
         const properties = validated_input['properties'];
-        properties['updated_at'] = utils.datetime_now();
-        
         const errors = validated_input['errors'];
 
         if (errors.length > 0) {
@@ -83,14 +81,16 @@ module.exports = {
         }
 
         const id_value = req.body.uuid;
-
         this.get_object(neode, res, model, id_value)
             .then(async (object) => {
                 if (object === false) {
                     utils.throw_neo4j_not_found_error(model);
                 }
 
-                await object.update(properties);
+                let new_properties = properties;
+                new_properties.updated_at = utils.datetime_now()();
+
+                await object.update(new_properties);
                 const json = await object.toJson();
                 res.send(json);
             });
@@ -165,10 +165,12 @@ module.exports = {
                     MATCH (user:User {uuid:"${object.get('uuid')}"})    
                                                                        
                     OPTIONAL MATCH (user)-[:INTERESTED_IN]->(interests:Category)
+                    OPTIONAL MATCH (user)-[:VIEWED]->(:Promotion)-[:IN_CATEGORY]->(viewed:Category)
                     OPTIONAL MATCH (user)-[:BOOKMARKED]->(bookmarked) 
                     
                     WITH 
                         user, 
+                        collect(id(viewed)) as viewed_set,
                         collect(id(interests)) as interests_set,
                         collect(id(bookmarked)) as bookmarked_set
                     
@@ -177,6 +179,7 @@ module.exports = {
                                         
                     WITH 
                         promotion,
+                        algo.similarity.jaccard(viewed_set, collect(id(category))) AS viewed_similarity,
                         algo.similarity.jaccard(interests_set, collect(id(category))) AS interest_similarity,
                         algo.similarity.jaccard(bookmarked_set, collect(id(promoter))) AS bookmarked_similarity,
                         distance(point({ x: ${longitude}, y: ${latitude} }), promoter.location) AS distance            
@@ -184,7 +187,7 @@ module.exports = {
                     WITH 
                         promotion,
                         distance,
-                        (interest_similarity + bookmarked_similarity)/2 as similarity
+                        (viewed_similarity + interest_similarity + bookmarked_similarity + (1/distance) ) /4 as similarity
                         
                         
                     RETURN promotion, similarity, distance ORDER BY similarity DESC SKIP ${skip} LIMIT ${limit} ;
